@@ -1,0 +1,44 @@
+name: Weekly Trend Miner Schedule
+
+on:
+  schedule:
+    # 23:59 UTC+7 is 16:59 UTC on Sunday
+    - cron: '59 16 * * 0'
+  workflow_dispatch: # Allow manual triggering for testing
+
+jobs:
+  run-trend-miner:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to push changes back to the repo
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (or Agent Environment)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run AI Agent Trend Miner Workflow
+        # Replace this command with the actual CLI command for your AI agent.
+        # Ensure your agent has access to its required API keys (e.g., OPENAI_API_KEY).
+        run: |
+          echo "Triggering AI Agent to run the weekly_trend_update workflow..."
+          # Example: npx @agent/cli run .agent/workflows/weekly_trend_update.md
+          
+          # Simulated script command for placeholder:
+          echo "## AI Trend Update $(date)" >> trends/2026-sample-trend.md
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "AI Trend Agent"
+          git config --global user.email "ai-agent@performance-wellness.com"
+          git pull origin main
+          git add trends/
+          git commit -m "Auto-update: Weekly trend mining [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:main
